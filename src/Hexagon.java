@@ -10,17 +10,18 @@ public class Hexagon implements Shape {
     private Point d;
     private Point e;
     private  Point f;
-    private int edgeLength;
+    //private int edgeLength;
+    private double edgeLength;
     private int hexagonRectangleWidth;
 
     public Hexagon (Point a, Point b) {
         this.a = a;
         this.b = b;
         this.edgeLength = (int)this.a.distance(this.b);
-        this.c = new Point(b.x, b.y -  this.edgeLength);
+        this.c = new Point(b.x, b.y -  (int) this.edgeLength);
         this.d = new Point(a.x, c.y - (a.y - b.y));
         this.e = new Point(d.x + (d.x - c.x) ,c.y);
-        this.f = new Point(e.x, e.y +  this.edgeLength);
+        this.f = new Point(e.x, e.y +  (int) this.edgeLength);
         this.hexagonRectangleWidth = this.e.x - this.c.x;
     }
 
@@ -44,11 +45,23 @@ public class Hexagon implements Shape {
         return d;
     }
 
-    public int getEdgeLength(){
+    public Point getC() {
+        return c;
+    }
+
+    public Point getE() {
+        return e;
+    }
+
+    public Point getF() {
+        return f;
+    }
+
+    public double getEdgeLength(){
         return this.edgeLength;
     }
 
-    public void draw (DrawSurface surface) {
+    public void draw (Graphics surface) {
         int distance = (int)this.a.distance(this.b);
         Point c = new Point(b.x, b.y - distance);
         Point d = new Point(a.x, c.y - (a.y - b.y));
@@ -62,7 +75,7 @@ public class Hexagon implements Shape {
         surface.drawLine(d.x, d.y, e.x, e.y);
         surface.drawLine(e.x, e.y, f.x, f.y);
         surface.drawLine(f.x, f.y, a.x, a.y);
-        surface.fillRectangle(c.x, c.y, e.x - c.x, distance);
+        surface.fillRect(c.x, c.y, e.x - c.x, distance);
 
         for ( int i = 0; i <= (e.x - c.x) / 2; i++) {
             surface.drawLine(c.x + i ,c.y, d.x, d.y);

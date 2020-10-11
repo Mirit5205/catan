@@ -1,6 +1,8 @@
 import biuoop.DrawSurface;
 
+import java.awt.*;
+
 public interface Shape {
 
-    void draw(DrawSurface d);
+    void draw(Graphics d);
 }

@@ -1,4 +1,5 @@
 import biuoop.DrawSurface;
+import sun.java2d.windows.GDIRenderer;
 
 import java.awt.*;
 
@@ -49,7 +50,7 @@ public class Resource {
      * draw tile - resource type and stat.
      * @param d is the draw surface.
      */
-    public void draw(DrawSurface d) {
+    public void draw(Graphics d) {
         h.draw(d);
         drawStat(d);
     }
@@ -86,7 +87,7 @@ public class Resource {
      * if tile is desert - draw noting.
      * @param d is the draw surface.
      */
-    public void drawStat(DrawSurface d) {
+    public void drawStat(Graphics d) {
         d.setColor(Color.white);
         int hexagonLength = this.getHexagon().getA().y - this.getHexagon().getD().y;
         int xVal = this.getHexagon().getA().x;
@@ -97,6 +98,7 @@ public class Resource {
         if (Board.IsHotNumber(this.stat)) {
             d.setColor(Board.HOT_NUMBER_COLOR);
         }
-        d.drawText(xVal, yVal, Integer.toString(this.stat), BOARD_NUMBERS_FONT_SIZE);
+        d.setFont(new Font("TimesRoman", Font.PLAIN, 30));
+        d.drawString(Integer.toString(this.stat), xVal - 5 , yVal);
     }
 }
