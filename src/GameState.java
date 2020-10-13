@@ -5,6 +5,8 @@ import java.util.List;
 public class GameState extends State {
 
     private boolean doesAllPlayersPickThereLocations = false;
+    private boolean doesDiceRolled = false;
+
     private int numOfPlayers;
     private Player[] players;
     private Board board;
@@ -22,10 +24,10 @@ public class GameState extends State {
     private static String IRON = "i";
     private static String MUD = "m";
 
-    private static String ROAD = "road";
-    private static String CITY = "city";
-    private static String SETTLEMENT = "settlement";
-    private static String CARD = "card";
+    private static final String ROAD = "road";
+    private static final String CITY = "city";
+    private static final String SETTLEMENT = "settlement";
+    private static final String CARD = "card";
 
     private int turnCounter = 0;
 
@@ -53,46 +55,14 @@ public class GameState extends State {
         //make a copy of the list of the mouse click points that represent setelments.
         bufferList.addAll(this.game.getMouseManager().DoubleClickScreenLocations);
 
-        //check if dice button is pressed
-        if (checkIfDiceButtonIsPressed(bufferList)) {
-            //roll the dice and print their value
-            this.diceButton.rollTheDice();
-            System.out.println("Dice show " + this.diceButton.getDiceVal());
-
-            //for every player in the game
-            for (int i = 0; i < players.length; i++) {
-                //take resources according to dice
-                takeResourcesAccordingToDice(this.diceButton.getDiceVal(), players[i]);
-                System.out.println(this.players[i].getResourcesList());
-            }
-
-            //clear buffer and click list
-            bufferList.clear();
-            this.game.getMouseManager().DoubleClickScreenLocations.clear();
-
-            return;
-        }
+        //roll dice and give every player resource accordingly.
+        diceRolling();
 
         //every player pick his first locations
-        if (this.turnCounter <= numOfPlayers * 4) {
-            if (!bufferList.isEmpty()) {
-                chooseFirstLocations(playersFirstTurnsByOrder.get(0));
-            }
-            if (turnCounter == numOfPlayers * 4) {
-                doesAllPlayersPickThereLocations = true;
-            }
-        }
+        firstStageOfGame();
 
-        //check if player end his turn - can used only after the first stage
-        if (doesAllPlayersPickThereLocations) {
-            //check if there was a double click
-            if (!bufferList.isEmpty()) {
-                playTurn(players[turnCounter % numOfPlayers], bufferList);
-            }
-            if (endTurnButton.IsPressed(bufferList)) {
-                turnCounter++;
-            }
-        }
+        //every player play his turn according the rules
+        secondStageOfGame();
 
         //clear double click point list and buffer.
         bufferList.clear();
@@ -302,7 +272,7 @@ public class GameState extends State {
                     for (int  i = 0; i < edges.length; i++) {
                         if (edges[i].ptSegDist(s.startPoint) < 0.1) {
                             if (r.getStat() == diceVal )
-                            p.getResourcesList().add(r);
+                            p.getResourcesList().add(r.getResourceType());
                             break;
                         }
                     }
@@ -331,7 +301,27 @@ public class GameState extends State {
      */
     public boolean doesHaveEnoughResources(String s, Player p) {
 
+
         boolean b = false;
+
+        switch (s) {
+            case ROAD:
+                b = isEnoughResourcesForRoad(p.getResourcesList());
+                roadPurchase(p.getResourcesList());
+            case SETTLEMENT:
+                b = isEnoughResourcesForSettlement(p.getResourcesList());
+                settlementPurchase(p.getResourcesList());
+            case CITY:
+                b = isEnoughResourcesForCity(p.getResourcesList());
+                cityPurchase(p.getResourcesList());
+            case CARD:
+                b = isEnoughResourcesForDevelopmentCard(p.getResourcesList());
+                cardPurchase(p.getResourcesList());
+            default:
+                break;
+        }
+
+/*
 
         if (s.equals(ROAD)) {
             b = isEnoughResourcesForRoad(p.getResourcesList());
@@ -346,7 +336,12 @@ public class GameState extends State {
             b = isEnoughResourcesForDevelopmentCard(p.getResourcesList());
             cardPurchase(p.getResourcesList());
         }
+
+
+ */
+
         return b;
+
 
     }
 
@@ -356,10 +351,10 @@ public class GameState extends State {
      * @param s is the specific resource represent by string.
      * @return the quantity of this resource.
      */
-    public static int getPlayerNumberOfSpecificResource(List<Resource> playerResources, String s) {
+    public static int getPlayerNumberOfSpecificResource(List<String> playerResources, String s) {
         int i = 0;
-        for (Resource r : playerResources) {
-            if (r.getResourceType().equals(s)) {
+        for (String resourceType : playerResources) {
+            if (resourceType.equals(s)) {
                 i++;
             }
         }
@@ -371,7 +366,7 @@ public class GameState extends State {
      * @param playerResources is player resources list.
      * @return true if it does.
      */
-    public boolean isEnoughResourcesForRoad(List<Resource> playerResources) {
+    public boolean isEnoughResourcesForRoad(List<String> playerResources) {
         return getPlayerNumberOfSpecificResource(playerResources, WOOD) >= 1
                 && getPlayerNumberOfSpecificResource(playerResources, MUD) >= 1;
     }
@@ -381,7 +376,7 @@ public class GameState extends State {
      * @param playerResources is player resources list.
      * @return true if it does.
      */
-    public boolean isEnoughResourcesForSettlement(List<Resource> playerResources) {
+    public boolean isEnoughResourcesForSettlement(List<String> playerResources) {
         if (playerResources.size() == 0) {
             return false;
         }
@@ -396,7 +391,7 @@ public class GameState extends State {
      * @param playerResources is player resources list.
      * @return true if it does.
      */
-    public boolean isEnoughResourcesForCity(List<Resource> playerResources) {
+    public boolean isEnoughResourcesForCity(List<String> playerResources) {
         return getPlayerNumberOfSpecificResource(playerResources, IRON) >= 3
                 && getPlayerNumberOfSpecificResource(playerResources, HAY) >= 2;
     }
@@ -406,7 +401,7 @@ public class GameState extends State {
      * @param playerResources is player resources list.
      * @return true if it does.
      */
-    public boolean isEnoughResourcesForDevelopmentCard(List<Resource> playerResources) {
+    public boolean isEnoughResourcesForDevelopmentCard(List<String> playerResources) {
         return getPlayerNumberOfSpecificResource(playerResources, IRON) >= 1
                 && getPlayerNumberOfSpecificResource(playerResources, HAY) >= 1
                 && getPlayerNumberOfSpecificResource(playerResources, SHEEP) >= 1;
@@ -419,24 +414,24 @@ public class GameState extends State {
      * from player resource list.
      * @param playerResources is player resource list.
      */
-    public void roadPurchase(List<Resource> playerResources) {
+    public void roadPurchase(List<String> playerResources) {
         int numOfRemoveWoods = 0;
         int numOfRemoveMuds = 0;
 
-        List<Resource> buffer = new ArrayList<>();
+        List<String> buffer = new ArrayList<>();
         buffer.addAll(playerResources);
 
-        for (Resource r : buffer) {
+        for (String resource : buffer) {
 
-            if (r.getResourceType() == WOOD
+            if (resource.equals(WOOD)
                     && numOfRemoveWoods < 1 ) {
                 numOfRemoveWoods++;
-                playerResources.remove(r);
+                playerResources.remove(resource);
             }
-            if (r.getResourceType() == MUD
+            if (resource.equals(MUD)
                     && numOfRemoveMuds < 1 ) {
                 numOfRemoveMuds++;
-                playerResources.remove(r);
+                playerResources.remove(resource);
             }
          }
     }
@@ -446,39 +441,39 @@ public class GameState extends State {
      * from player resource list.
      * @param playerResources is player resource list.
      */
-    public void settlementPurchase(List<Resource> playerResources) {
+    public void settlementPurchase(List<String> playerResources) {
         int numOfRemoveWoods = 0;
         int numOfRemoveMuds = 0;
         int numOfRemoveSheeps = 0;
         int numOfRemoveHays = 0;
 
-        List<Resource> buffer = new ArrayList<>();
+        List<String> buffer = new ArrayList<>();
         buffer.addAll(playerResources);
 
-        for (Resource r : buffer) {
+        for (String resource : buffer) {
 
-            if (r.getResourceType() == WOOD
+            if (resource.equals(WOOD)
                     && numOfRemoveWoods < 1 ) {
                 numOfRemoveWoods++;
-                playerResources.remove(r);
+                playerResources.remove(resource);
             }
 
-            if (r.getResourceType() == MUD
+            if (resource.equals(MUD)
                     && numOfRemoveMuds < 1 ) {
                 numOfRemoveMuds++;
-                playerResources.remove(r);
+                playerResources.remove(resource);
             }
 
-            if (r.getResourceType() == HAY
+            if (resource.equals(HAY)
                     && numOfRemoveHays < 1 ) {
                 numOfRemoveHays++;
-                playerResources.remove(r);
+                playerResources.remove(resource);
             }
 
-            if (r.getResourceType() == SHEEP
+            if (resource.equals(SHEEP)
                     && numOfRemoveSheeps < 1 ) {
                 numOfRemoveSheeps++;
-                playerResources.remove(r);
+                playerResources.remove(resource);
             }
         }
     }
@@ -488,25 +483,25 @@ public class GameState extends State {
      * from player resource list.
      * @param playerResources is player resource list.
      */
-    public void cityPurchase(List<Resource> playerResources) {
+    public void cityPurchase(List<String> playerResources) {
         int numOfRemoveIrons = 0;
         int numOfRemoveHays = 0;
 
-        List<Resource> buffer = new ArrayList<>();
+        List<String> buffer = new ArrayList<>();
         buffer.addAll(playerResources);
 
-        for (Resource r : buffer) {
+        for (String resource : buffer) {
 
-            if (r.getResourceType() == IRON
+            if (resource.equals(IRON)
                     && numOfRemoveIrons < 3 ) {
                 numOfRemoveIrons++;
-                playerResources.remove(r);
+                playerResources.remove(resource);
             }
 
-            if (r.getResourceType() == HAY
+            if (resource.equals(HAY)
                     && numOfRemoveHays < 2 ) {
                 numOfRemoveHays++;
-                playerResources.remove(r);
+                playerResources.remove(resource);
             }
         }
     }
@@ -516,38 +511,41 @@ public class GameState extends State {
      * from player resource list.
      * @param playerResources is player resource list.
      */
-    public void cardPurchase(List<Resource> playerResources) {
+    public void cardPurchase(List<String> playerResources) {
         int numOfRemoveIrons = 0;
         int numOfRemoveHays = 0;
         int numOfRemoveSheeps = 0;
 
 
-        List<Resource> buffer = new ArrayList<>();
+        List<String> buffer = new ArrayList<>();
         buffer.addAll(playerResources);
 
-        for (Resource r : buffer) {
+        for (String resource : buffer) {
 
-            if (r.getResourceType() == IRON
+            if (resource.equals(IRON)
                     && numOfRemoveIrons < 1 ) {
                 numOfRemoveIrons++;
-                playerResources.remove(r);
+                playerResources.remove(resource);
             }
 
-            if (r.getResourceType() == HAY
+            if (resource.equals(HAY)
                     && numOfRemoveHays < 1 ) {
                 numOfRemoveHays++;
-                playerResources.remove(r);
+                playerResources.remove(resource);
             }
 
-            if (r.getResourceType() == SHEEP
+            if (resource.equals(SHEEP)
                     && numOfRemoveSheeps < 1 ) {
                 numOfRemoveSheeps++;
-                playerResources.remove(r);
+                playerResources.remove(resource);
             }
         }
     }
 
-
+    /**
+     * set number of players to the game.
+     * @param numOfPlayers is the player's number.
+     */
     public void setNumOfPlayers(int numOfPlayers) {
         this.numOfPlayers = numOfPlayers;
     }
@@ -580,87 +578,104 @@ public class GameState extends State {
            if it already represent setelment or road do nothing. (check it in the
            sprite list).
          */
-            Point p = bufferList.get(0);
-            Point closestSettelmentPoint = findClosestVertex(p);
-            Line closestRoadEdge = findClosestEdge(p);
+        Point p = bufferList.get(0);
+        Point closestSettelmentPoint = findClosestVertex(p);
+        Line closestRoadEdge = findClosestEdge(p);
 
-            if (closestRoadEdge == null && closestSettelmentPoint == null) {
-                //remove point from the list of mouse click points
-                this.game.getMouseManager().DoubleClickScreenLocations.remove(p);
-            } else if (closestSettelmentPoint != null) {
-                if (doesHaveEnoughResources(SETTLEMENT, player)) {
-                    buildSettlement(closestSettelmentPoint, player);
-                }
-            } else {
-                if ( doesHaveEnoughResources(ROAD, player)){
-                    buildRoad(closestRoadEdge, player);
-                }
+        if (closestRoadEdge == null && closestSettelmentPoint == null) {
+            //remove point from the list of mouse click points
+            this.game.getMouseManager().DoubleClickScreenLocations.remove(p);
+        } else if (closestSettelmentPoint != null) {
+            if (doesHaveEnoughResources(SETTLEMENT, player)) {
+                buildSettlement(closestSettelmentPoint, player);
+            }
+        } else {
+            if ( doesHaveEnoughResources(ROAD, player)){
+                buildRoad(closestRoadEdge, player);
             }
         }
+    }
 
-        public Player[] getGamePlayers() {
+    /**
+     * @return game's players arr.
+     */
+    public Player[] getGamePlayers() {
         return this.players;
+    }
+
+    /**
+     * choose player initial locations.
+     * @param player is the player that its turn to choose location.
+     */
+    public void chooseFirstLocations(Player player) {
+        Point p = bufferList.get(0);
+        Point closestSettelmentPoint = findClosestVertex(p);
+        Line closestRoadEdge = findClosestEdge(p);
+
+        int playerSettlementsCounter = player.getSettlementsList().size();
+        int playerRoadsCounter = player.getRoadsList().size();
+
+        if (closestRoadEdge == null && closestSettelmentPoint == null) {
+            //remove point from the list of mouse click points
+            this.game.getMouseManager().DoubleClickScreenLocations.remove(p);
+        } else if (closestSettelmentPoint != null) {
+            if (playerSettlementsCounter == 0
+                    || (playerSettlementsCounter == 1
+                    && playerRoadsCounter == 1)) {
+                buildSettlement(closestSettelmentPoint, player);
+                playersFirstTurnsByOrder.remove(playersFirstTurnsByOrder.get(0));
+            }
+        } else {
+            if (playerRoadsCounter == 0
+                    || (playerRoadsCounter == 1
+                    && playerSettlementsCounter == 2)) {
+                buildRoad(closestRoadEdge, player);
+                playersFirstTurnsByOrder.remove(playersFirstTurnsByOrder.get(0));
+            }
         }
+        turnCounter++;
+    }
 
-
-        public void chooseFirstLocations(Player player) {
-            Point p = bufferList.get(0);
-            Point closestSettelmentPoint = findClosestVertex(p);
-            Line closestRoadEdge = findClosestEdge(p);
-
-            int playerSettlementsCounter = player.getSettlementsList().size();
-            int playerRoadsCounter = player.getRoadsList().size();
-
-            if (closestRoadEdge == null && closestSettelmentPoint == null) {
-                        //remove point from the list of mouse click points
-                        this.game.getMouseManager().DoubleClickScreenLocations.remove(p);
-                    } else if (closestSettelmentPoint != null) {
-                        if (playerSettlementsCounter == 0
-                                || (playerSettlementsCounter == 1
-                                && playerRoadsCounter == 1)) {
-                            buildSettlement(closestSettelmentPoint, player);
-                            playersFirstTurnsByOrder.remove(playersFirstTurnsByOrder.get(0));
-                        }
-                    } else {
-                        if (playerRoadsCounter == 0
-                                || (playerRoadsCounter == 1
-                                && playerSettlementsCounter == 2)) {
-                            buildRoad(closestRoadEdge, player);
-                            playersFirstTurnsByOrder.remove(playersFirstTurnsByOrder.get(0));
-                        }
-                    }
-                }
-
-            public void buildRoad(Line RoadEdge, Player p){
-                if (!checkIfRoadAlreadyExist(RoadEdge)
-                        && this.clearEdges.contains(RoadEdge)
-                        && isRoadLocationIsAccessible(RoadEdge)) {
-                    Road newRoad = new Road(RoadEdge.getX1(),
-                            RoadEdge.getY1(),
-                            RoadEdge.getX2(),
-                            RoadEdge.getY2());
+    /**
+     * build road according to given point for specific player.
+     * @param RoadEdge is the road location.
+     * @param p is the player who own the new road.
+     */
+    public void buildRoad(Line RoadEdge, Player p){
+        if (!checkIfRoadAlreadyExist(RoadEdge)
+                && this.clearEdges.contains(RoadEdge)
+                && isRoadLocationIsAccessible(RoadEdge)) {
+            Road newRoad = new Road(RoadEdge.getX1(),
+                    RoadEdge.getY1(),
+                    RoadEdge.getX2(),
+                    RoadEdge.getY2());
                     newRoad.setColor(p.getColor());
                     //add point to game sprite list as setelment.
                     this.spriteList.add(newRoad);
                     p.getRoadsList().add(newRoad);
             }
-                turnCounter++;
-            }
+    }
 
-        public void buildSettlement(Point settlementPoint, Player p) {
-                if (this.clearVertexes.contains(settlementPoint)) {
-                    //add point to game sprite list as setelment.
-                    Settlement newSettlement = new Settlement(settlementPoint, this.game);
-                    newSettlement.setColor(p.getColor());
-                    this.spriteList.add(newSettlement);
-                    p.getSettlementsList().add(newSettlement);
-                    removeUnReachableSettelmentesLocations(this.clearVertexes, settlementPoint);
-                }
-            turnCounter++;
-
-
+    /**
+     * build settlement according to given point for specific player.
+     * @param settlementPoint is the settlement location.
+     * @param p is the player who own the new settlement.
+     */
+    public void buildSettlement(Point settlementPoint, Player p) {
+        if (this.clearVertexes.contains(settlementPoint)) {
+            //add point to game sprite list as setelment.
+            Settlement newSettlement = new Settlement(settlementPoint, this.game);
+            newSettlement.setColor(p.getColor());
+            this.spriteList.add(newSettlement);
+            p.getSettlementsList().add(newSettlement);
+            removeUnReachableSettelmentesLocations(this.clearVertexes, settlementPoint);
         }
+    }
 
+
+    /**
+     * initial player's turns order.
+     */
     public void initListOfFirstTurnsByOrder() {
 
         for (int i = 0; i < players.length; i++) {
@@ -671,6 +686,59 @@ public class GameState extends State {
         for(int i = players.length - 1; i >= 0; i-- ) {
             playersFirstTurnsByOrder.add(players[i]);
             playersFirstTurnsByOrder.add(players[i]);
+        }
+    }
+
+    /**
+     * rolling the dice and give every player the appropriate resources.
+     */
+    public void diceRolling() {
+        //check if dice button is pressed
+        if (checkIfDiceButtonIsPressed(bufferList) && !doesDiceRolled) {
+            //roll the dice and print their value
+            this.diceButton.rollTheDice();
+            System.out.println("Dice show " + this.diceButton.getDiceVal());
+
+            //for every player in the game
+            for (int i = 0; i < players.length; i++) {
+                //take resources according to dice
+                takeResourcesAccordingToDice(this.diceButton.getDiceVal(), players[i]);
+                System.out.println(this.players[i].getResourcesList());
+            }
+            this.doesDiceRolled = true;
+            //clear buffer and click list
+            bufferList.clear();
+            this.game.getMouseManager().DoubleClickScreenLocations.clear();
+        }
+    }
+
+    /**
+     * every player choose is first locations.
+     */
+    public void firstStageOfGame() {
+        if (this.turnCounter < numOfPlayers * 4) {
+            if (!bufferList.isEmpty()) {
+                chooseFirstLocations(playersFirstTurnsByOrder.get(0));
+            }
+            if (turnCounter == numOfPlayers * 4) {
+                doesAllPlayersPickThereLocations = true;
+            }
+        }
+    }
+
+    /**
+     * every player play in his turn.
+     */
+    public void secondStageOfGame() {
+        if (doesAllPlayersPickThereLocations) {
+            if (endTurnButton.IsPressed(bufferList) && this.doesDiceRolled) {
+                turnCounter++;
+                this.doesDiceRolled = false;
+            }
+            //check if there was a double click
+            if (!bufferList.isEmpty()) {
+                playTurn(players[turnCounter % numOfPlayers], bufferList);
+            }
         }
     }
 }

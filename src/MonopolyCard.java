@@ -19,16 +19,16 @@ public class MonopolyCard extends DevelopmentCard {
             if (gamePlayers[i].getPlayerName().equals(this.owner.getPlayerName())) {
                 continue;
             }
-            buffer = gamePlayers[i].getResourcesList();
+            //buffer = gamePlayers[i].getResourcesList();
 
             //if the monopoly resource appear remove it from the
             //this resource list and add it to the owner list
-            for (Resource r : buffer ) {
-               if (r.getResourceType().equals(this.monopolyResource)) {
-                   this.owner.getResourcesList().add(r);
-                   gamePlayers[ i].getResourcesList().remove(r);
-               }
-            }
+            //for (Resource r : buffer ) {
+             //  if (r.getResourceType().equals(this.monopolyResource)) {
+              //     this.owner.getResourcesList().add(r);
+              //     gamePlayers[ i].getResourcesList().remove(r);
+              // }
+            //}
         }
     }
 

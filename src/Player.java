@@ -6,7 +6,7 @@ import java.util.List;
 public class Player {
     private Color c;
     private String playerName;
-    private List<Resource>  resources = new ArrayList<>();
+    private List<String>  resources = new ArrayList<>();
     private List<Settlement> settlements = new ArrayList<>();
     private List<Road> roads = new ArrayList<>();
     private List<City> cities = new ArrayList<>();
@@ -20,7 +20,7 @@ public class Player {
         return this.settlements;
     }
 
-    public List<Resource> getResourcesList() {
+    public List<String> getResourcesList() {
         return this.resources;
     }
 
