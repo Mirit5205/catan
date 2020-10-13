@@ -1,14 +1,15 @@
 import java.awt.*;
 
 public abstract class Sprite {
-    protected double x,y;
+    protected Point startPoint;
 
-    public Sprite(double x, double y) {
-        this.x = x;
-        this.y = y;
+    public Sprite(Point p) {
+        this.startPoint = p;
     }
     public abstract void tick();
     public abstract void render(Graphics g);
-    
+
+    public abstract Point getEndPoint();
+
 
 }

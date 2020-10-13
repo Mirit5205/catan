@@ -101,4 +101,8 @@ public class Resource {
         d.setFont(new Font("TimesRoman", Font.PLAIN, 30));
         d.drawString(Integer.toString(this.stat), xVal - 5 , yVal);
     }
+
+    public String getResourceType() {
+        return this.resourceType;
+    }
 }

@@ -33,8 +33,10 @@ public class Game implements Runnable {
         this.display.getCanvas().addMouseListener(this.mouseManager);
         this.display.getCanvas().addMouseMotionListener(this.mouseManager);
         this.board.initBoardTiles();
-        this.gameState = new GameState(this);
+        this.gameState = new Menu(this);
         State.setState(gameState);
+        //this.gameState = new GameState(this);
+        //State.setState(gameState);
     }
 
     private void tick() {
@@ -126,5 +128,18 @@ public class Game implements Runnable {
 
     public MouseManager getMouseManager() {
         return this.mouseManager;
+    }
+
+    public void setGameState(State gameState) {
+        this.gameState = gameState;
+    }
+
+    public State getGameState() {
+        return this.gameState;
+    }
+
+    public void clearGameCanvas() {
+        this.g.clearRect(0, 0, 2000, 1200);
+
     }
 }
