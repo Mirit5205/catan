@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
 
 public class Game implements Runnable {
     private Display display;
@@ -12,6 +13,8 @@ public class Game implements Runnable {
 
     private BufferStrategy bs;
     private Graphics g;
+
+    private BufferedImage backgroundImage;
 
     //states
     private State gameState;
@@ -33,9 +36,31 @@ public class Game implements Runnable {
         this.display.getCanvas().addMouseListener(this.mouseManager);
         this.display.getCanvas().addMouseMotionListener(this.mouseManager);
         this.board.initBoardTiles();
-        this.gameState = new Menu(this);
+        this.backgroundImage = ImageLoader.loadImage("/textures/CatanMenuBackground.jpg");
+        this.backgroundImage = ImageLoader.resize(this.backgroundImage, 2000, 1200);
+        //this.gameState = new Menu(this);
+
+
+        // test1
+        Test1 test = new Test1(this);
+        test.setNumOfPlayers(2);
+        test.initPlayersArr();
+        test.initListOfFirstTurnsByOrder();
+        this.gameState = test;
+
+
+
+
+
+        /*  game - no test!
+        GameState game =  new GameState(this);
+        game.setNumOfPlayers(2);
+        game.initPlayersArr();
+        game.initListOfFirstTurnsByOrder();
+        this.gameState = game;
+
+         */
         State.setState(gameState);
-        //this.gameState = new GameState(this);
         //State.setState(gameState);
     }
 
@@ -57,11 +82,13 @@ public class Game implements Runnable {
         //this.g = this.display.getCanvas().getGraphics();
         this.g = this.bs.getDrawGraphics();
 
+
         if (State.getState() != null) {
             State.getState().setBoard(this.board);
             State.getState().render(this.g);
         }
 
+        g.drawImage(backgroundImage, 0, 0, null);
         this.bs.show();
         this.g.dispose();
     }
@@ -141,5 +168,9 @@ public class Game implements Runnable {
     public void clearGameCanvas() {
         this.g.clearRect(0, 0, 2000, 1200);
 
+    }
+
+    public BufferedImage getBackgroundImage() {
+        return this.backgroundImage;
     }
 }

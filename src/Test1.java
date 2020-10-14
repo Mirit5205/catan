@@ -1,8 +1,9 @@
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class GameState extends State {
+public class Test1 extends State {
 
     private boolean doesAllPlayersPickThereLocations = false;
     private boolean doesDiceRolled = false;
@@ -32,15 +33,11 @@ public class GameState extends State {
     private int turnCounter = 0;
 
 
-
-
-
     private static int DICE_BUTTON_X = 100;
     private static int DICE_BUTTON_y = 300;
 
 
-
-    public GameState(Game g) {
+    public Test1(Game g) {
         super(g);
         clearVertexes = this.game.getBoard().BoardVertexList;
         clearEdges = this.game.getBoard().BoardEdgesList;
@@ -68,6 +65,7 @@ public class GameState extends State {
         if (isWin()) {
             System.exit(2);
         }
+
         //clear double click point list and buffer.
         bufferList.clear();
         this.game.getMouseManager().DoubleClickScreenLocations.clear();
@@ -75,8 +73,6 @@ public class GameState extends State {
 
     @Override
     public void render(Graphics g) {
-        //clear the canvas from earlier draws (from previous states)
-        g.clearRect(0, 0, 2000, 1200);
         board.render(g);
         if (this.spriteList.size() != 0) {
             for (Sprite s : this.spriteList) {
@@ -88,6 +84,7 @@ public class GameState extends State {
 
     /**
      * set game board to game state.
+     *
      * @param b is the game board.
      */
     public void setBoard(Board b) {
@@ -97,6 +94,7 @@ public class GameState extends State {
     /**
      * check if the point of the mouse click are
      * closest to any vertex.
+     *
      * @param p is the mouse click point.
      * @return null if the point is not close to any vertex,
      * else it return the closest vertex;
@@ -124,6 +122,7 @@ public class GameState extends State {
 
     /**
      * find board edge that is the closest to given mouse click point p.
+     *
      * @param p is the given point.
      * @return the closest board edge.
      */
@@ -151,9 +150,10 @@ public class GameState extends State {
     /**
      * remove unreachable setelments locations from clear vertexes list
      * according to game rules.
+     *
      * @param clearVertexes is the clear vertexes list.
-     * @param p is the point of the new setelment that cause the
-     * changes.
+     * @param p             is the point of the new setelment that cause the
+     *                      changes.
      */
     public void removeUnReachableSettelmentesLocations(List<Point> clearVertexes, Point p) {
         //calculate tile hexagon length
@@ -172,6 +172,7 @@ public class GameState extends State {
 
     /**
      * check if the desirable road location is accessible.
+     *
      * @param roadEdge is the given road
      * @return
      */
@@ -179,7 +180,6 @@ public class GameState extends State {
         boolean b = false;
 
         for (Settlement s : p.getSettlementsList()) {
-            System.out.println("road next to settlment " + isRoadIsNextToSettelment(s, roadEdge));
             if (isRoadIsNextToSettelment(s, roadEdge)) {
                 b = true;
                 break;
@@ -187,18 +187,18 @@ public class GameState extends State {
         }
 
         for (Road r : p.getRoadsList()) {
-            System.out.println("road next to road " + isRoadIsNextToSettelment(r, roadEdge));
             if (isRoadIsNextToRoad(r, roadEdge)) {
                 b = true;
                 break;
-        }
+            }
         }
         return b;
     }
 
     /**
      * check if the given road is next to existent setelment.
-     * @param s is a game sprite.
+     *
+     * @param s        is a game sprite.
      * @param roadEdge is the given road.
      * @return true if it does.
      */
@@ -209,13 +209,14 @@ public class GameState extends State {
 
     /**
      * check if the given road is next to existent road.
-     * @param s is a game sprite.
+     *
+     * @param s        is a game sprite.
      * @param roadEdge is the given road.
      * @return true if it does.
      */
     public boolean isRoadIsNextToRoad(Sprite s, Line roadEdge) {
         return s instanceof Road
-                &&  (roadEdge.getP1().distance(s.startPoint) == 0
+                && (roadEdge.getP1().distance(s.startPoint) == 0
                 || roadEdge.getP2().distance(s.startPoint) == 0
                 || roadEdge.getP1().distance(s.getEndPoint()) == 0
                 || roadEdge.getP2().distance(s.getEndPoint()) == 0);
@@ -223,7 +224,7 @@ public class GameState extends State {
 
     public boolean checkIfDiceButtonIsPressed(List<Point> clicks) {
         boolean b = false;
-        for ( Point p : clicks) {
+        for (Point p : clicks) {
             if (this.diceButton.getButtonRectengle().contains(p)) {
                 b = true;
             }
@@ -233,7 +234,7 @@ public class GameState extends State {
 
     public boolean checkIfSettlementAlreadyExist(Point newSettlementPoint) {
         boolean b = false;
-        for (Sprite s: this.spriteList) {
+        for (Sprite s : this.spriteList) {
             if (s.startPoint.equals(newSettlementPoint)) {
                 b = true;
                 break;
@@ -244,13 +245,14 @@ public class GameState extends State {
 
     /**
      * check if the desire road is already existed.
+     *
      * @param newRoadLine is the desire road.
      * @return true if it does.
      */
     public boolean checkIfRoadAlreadyExist(Line newRoadLine) {
         boolean b = false;
         Line l;
-        for (Sprite s: this.spriteList) {
+        for (Sprite s : this.spriteList) {
 
             //if s is not road continue to the sprite
             if (!(s instanceof Road)) {
@@ -269,7 +271,8 @@ public class GameState extends State {
     /**
      * check which player's settlements intersect with resources that has
      * stat that equal to dice value and add them to player resources list.
-     * @param p is the player.
+     *
+     * @param p       is the player.
      * @param diceVal is the dice value.
      */
     public void takeResourcesAccordingToDice(int diceVal, Player p) {
@@ -278,9 +281,9 @@ public class GameState extends State {
         for (Resource r : this.board.boardTiles) {
             edges = hexagonRepresentByEdges(r.getHexagon());
             for (Settlement s : p.getSettlementsList()) {
-                for (int  i = 0; i < edges.length; i++) {
+                for (int i = 0; i < edges.length; i++) {
                     if (edges[i].ptSegDist(s.startPoint) < 0.1) {
-                        if (r.getStat() == diceVal )
+                        if (r.getStat() == diceVal)
                             p.getResourcesList().add(r.getResourceType());
                         break;
                     }
@@ -292,11 +295,12 @@ public class GameState extends State {
 
     /**
      * divide hexagon into edges and store them in array.
+     *
      * @param h is the hexagon.
      * @return array of hexagon edges.
      */
     public Line[] hexagonRepresentByEdges(Hexagon h) {
-        Line[] edges = { new Line(h.getA(), h.getB()), new Line(h.getB(), h.getC()),
+        Line[] edges = {new Line(h.getA(), h.getB()), new Line(h.getB(), h.getC()),
                 new Line(h.getC(), h.getD()), new Line(h.getD(), h.getE()),
                 new Line(h.getE(), h.getF()), new Line(h.getF(), h.getA())};
         return edges;
@@ -304,6 +308,7 @@ public class GameState extends State {
 
     /**
      * check if the player has enough resources for purchase specific structure or card.
+     *
      * @param s is the desire structure.
      * @param p is the player.
      * @return true if it does.
@@ -360,8 +365,9 @@ public class GameState extends State {
 
     /**
      * check how many resources of specific type the player has.
+     *
      * @param playerResources is player's resources list.
-     * @param s is the specific resource represent by string.
+     * @param s               is the specific resource represent by string.
      * @return the quantity of this resource.
      */
     public static int getPlayerNumberOfSpecificResource(List<String> playerResources, String s) {
@@ -376,6 +382,7 @@ public class GameState extends State {
 
     /**
      * check if the player has enough resources for purchase road.
+     *
      * @param playerResources is player resources list.
      * @return true if it does.
      */
@@ -386,6 +393,7 @@ public class GameState extends State {
 
     /**
      * check if the player has enough resources for purchase settlement.
+     *
      * @param playerResources is player resources list.
      * @return true if it does.
      */
@@ -401,6 +409,7 @@ public class GameState extends State {
 
     /**
      * check if the player has enough resources for purchase city.
+     *
      * @param playerResources is player resources list.
      * @return true if it does.
      */
@@ -411,6 +420,7 @@ public class GameState extends State {
 
     /**
      * check if the player has enough resources for purchase development card.
+     *
      * @param playerResources is player resources list.
      * @return true if it does.
      */
@@ -425,6 +435,7 @@ public class GameState extends State {
     /**
      * remove the resources value of road (according to game rules)
      * from player resource list.
+     *
      * @param playerResources is player resource list.
      */
     public void roadPurchase(List<String> playerResources) {
@@ -437,12 +448,12 @@ public class GameState extends State {
         for (String resource : buffer) {
 
             if (resource.equals(WOOD)
-                    && numOfRemoveWoods < 1 ) {
+                    && numOfRemoveWoods < 1) {
                 numOfRemoveWoods++;
                 playerResources.remove(resource);
             }
             if (resource.equals(MUD)
-                    && numOfRemoveMuds < 1 ) {
+                    && numOfRemoveMuds < 1) {
                 numOfRemoveMuds++;
                 playerResources.remove(resource);
             }
@@ -452,6 +463,7 @@ public class GameState extends State {
     /**
      * remove the resources value of settlement (according to game rules)
      * from player resource list.
+     *
      * @param playerResources is player resource list.
      */
     public void settlementPurchase(List<String> playerResources) {
@@ -466,25 +478,25 @@ public class GameState extends State {
         for (String resource : buffer) {
 
             if (resource.equals(WOOD)
-                    && numOfRemoveWoods < 1 ) {
+                    && numOfRemoveWoods < 1) {
                 numOfRemoveWoods++;
                 playerResources.remove(resource);
             }
 
             if (resource.equals(MUD)
-                    && numOfRemoveMuds < 1 ) {
+                    && numOfRemoveMuds < 1) {
                 numOfRemoveMuds++;
                 playerResources.remove(resource);
             }
 
             if (resource.equals(HAY)
-                    && numOfRemoveHays < 1 ) {
+                    && numOfRemoveHays < 1) {
                 numOfRemoveHays++;
                 playerResources.remove(resource);
             }
 
             if (resource.equals(SHEEP)
-                    && numOfRemoveSheeps < 1 ) {
+                    && numOfRemoveSheeps < 1) {
                 numOfRemoveSheeps++;
                 playerResources.remove(resource);
             }
@@ -494,6 +506,7 @@ public class GameState extends State {
     /**
      * remove the resources value of city (according to game rules)
      * from player resource list.
+     *
      * @param playerResources is player resource list.
      */
     public void cityPurchase(List<String> playerResources) {
@@ -506,13 +519,13 @@ public class GameState extends State {
         for (String resource : buffer) {
 
             if (resource.equals(IRON)
-                    && numOfRemoveIrons < 3 ) {
+                    && numOfRemoveIrons < 3) {
                 numOfRemoveIrons++;
                 playerResources.remove(resource);
             }
 
             if (resource.equals(HAY)
-                    && numOfRemoveHays < 2 ) {
+                    && numOfRemoveHays < 2) {
                 numOfRemoveHays++;
                 playerResources.remove(resource);
             }
@@ -522,6 +535,7 @@ public class GameState extends State {
     /**
      * remove the resources value of development card (according to game rules)
      * from player resource list.
+     *
      * @param playerResources is player resource list.
      */
     public void cardPurchase(List<String> playerResources) {
@@ -536,19 +550,19 @@ public class GameState extends State {
         for (String resource : buffer) {
 
             if (resource.equals(IRON)
-                    && numOfRemoveIrons < 1 ) {
+                    && numOfRemoveIrons < 1) {
                 numOfRemoveIrons++;
                 playerResources.remove(resource);
             }
 
             if (resource.equals(HAY)
-                    && numOfRemoveHays < 1 ) {
+                    && numOfRemoveHays < 1) {
                 numOfRemoveHays++;
                 playerResources.remove(resource);
             }
 
             if (resource.equals(SHEEP)
-                    && numOfRemoveSheeps < 1 ) {
+                    && numOfRemoveSheeps < 1) {
                 numOfRemoveSheeps++;
                 playerResources.remove(resource);
             }
@@ -557,6 +571,7 @@ public class GameState extends State {
 
     /**
      * set number of players to the game.
+     *
      * @param numOfPlayers is the player's number.
      */
     public void setNumOfPlayers(int numOfPlayers) {
@@ -568,10 +583,49 @@ public class GameState extends State {
      */
     public void initPlayersArr() {
         Color[] playersColors = {Color.RED, Color.MAGENTA, Color.LIGHT_GRAY, Color.DARK_GRAY};
-        String[] playersNames = {"Red", "Pink", "Light Gray", "Dark Gray"};
         players = new Player[this.numOfPlayers];
-        for  (int i = 0; i < numOfPlayers; i++) {
+        String[] resourceArr = {"w", "w", "w", "w", "w", "w", "w", "w",
+                "m", "m", "m", "m", "m", "m", "m", "m",
+                "s", "s", "s", "s", "s", "s", "s", "s",
+                "h", "h", "h", "h", "h", "h", "h", "h",
+                "w", "w", "w", "w", "w", "w", "w", "w",
+                "m", "m", "m", "m", "m", "m", "m", "m",
+                "s", "s", "s", "s", "s", "s", "s", "s",
+                "h", "h", "h", "h", "h", "h", "h", "h",
+                "w", "w", "w", "w", "w", "w", "w", "w",
+                "m", "m", "m", "m", "m", "m", "m", "m",
+                "s", "s", "s", "s", "s", "s", "s", "s",
+                "h", "h", "h", "h", "h", "h", "h", "h","w",
+                "w", "w", "w", "w", "w", "w", "w",
+                "m", "m", "m", "m", "m", "m", "m", "m",
+                "s", "s", "s", "s", "s", "s", "s", "s",
+                "h", "h", "h", "h", "h", "h", "h", "h",
+                "w", "w", "w", "w", "w", "w", "w", "w",
+                "m", "m", "m", "m", "m", "m", "m", "m",
+                "s", "s", "s", "s", "s", "s", "s", "s",
+                "h", "h", "h", "h", "h", "h", "h", "h",
+                "w", "w", "w", "w", "w", "w", "w", "w",
+                "m", "m", "m", "m", "m", "m", "m", "m",
+                "s", "s", "s", "s", "s", "s", "s", "s",
+                "h", "h", "h", "h", "h", "h", "h", "h",
+                "w", "w", "w", "w", "w", "w", "w", "w",
+                "m", "m", "m", "m", "m", "m", "m", "m",
+                "s", "s", "s", "s", "s", "s", "s", "s",
+                "h", "h", "h", "h", "h", "h", "h", "h",
+                "w", "w", "w", "w", "w", "w", "w", "w",
+                "m", "m", "m", "m", "m", "m", "m", "m",
+                "s", "s", "s", "s", "s", "s", "s", "s",
+                "h", "h", "h", "h", "h", "h", "h", "h",
+                "w", "w", "w", "w", "w", "w", "w", "w",
+                "m", "m", "m", "m", "m", "m", "m", "m",
+                "s", "s", "s", "s", "s", "s", "s", "s",
+                "h", "h", "h", "h", "h", "h", "h", "h"};
+        List<String> resourcelist = Arrays.asList(resourceArr);
+        String[] playersNames = {"Red", "Pink", "Light Gray", "Dark Gray"};
+
+        for (int i = 0; i < numOfPlayers; i++) {
             players[i] = new Player(playersColors[i]);
+            players[i].getResourcesList().addAll(resourcelist);
             players[i].setPlayerName(playersNames[i]);
         }
     }
@@ -579,7 +633,8 @@ public class GameState extends State {
 
     /**
      * play turn in the game.
-     * @param player is the player that it his turn.
+     *
+     * @param player     is the player that it his turn.
      * @param bufferList is the clicks list.
      */
 
@@ -607,7 +662,7 @@ public class GameState extends State {
                 buildSettlement(closestSettelmentPoint, player);
             }
         } else {
-            if (doesHaveEnoughResources(ROAD, player)){
+            if (doesHaveEnoughResources(ROAD, player)) {
                 System.out.println("enough resources for road");
                 buildRoad(closestRoadEdge, player);
             }
@@ -623,6 +678,7 @@ public class GameState extends State {
 
     /**
      * choose player initial locations.
+     *
      * @param player is the player that its turn to choose location.
      */
     public void chooseFirstLocations(Player player) {
@@ -656,10 +712,11 @@ public class GameState extends State {
 
     /**
      * build road according to given point for specific player.
+     *
      * @param RoadEdge is the road location.
-     * @param p is the player who own the new road.
+     * @param p        is the player who own the new road.
      */
-    public void buildRoad(Line RoadEdge, Player p){
+    public void buildRoad(Line RoadEdge, Player p) {
         System.out.println(!checkIfRoadAlreadyExist(RoadEdge));
         System.out.println(this.clearEdges.contains(RoadEdge));
         System.out.println(isRoadLocationIsAccessible(RoadEdge, p));
@@ -680,8 +737,9 @@ public class GameState extends State {
 
     /**
      * build settlement according to given point for specific player.
+     *
      * @param settlementPoint is the settlement location.
-     * @param p is the player who own the new settlement.
+     * @param p               is the player who own the new settlement.
      */
     public void buildSettlement(Point settlementPoint, Player p) {
         if (this.clearVertexes.contains(settlementPoint)) {
@@ -706,7 +764,7 @@ public class GameState extends State {
             this.playersFirstTurnsByOrder.add(players[i]);
         }
 
-        for(int i = players.length - 1; i >= 0; i-- ) {
+        for (int i = players.length - 1; i >= 0; i--) {
             playersFirstTurnsByOrder.add(players[i]);
             playersFirstTurnsByOrder.add(players[i]);
         }

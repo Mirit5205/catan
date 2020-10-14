@@ -43,4 +43,13 @@ public class Player {
     public List<Road> getRoadsList() {
         return roads;
     }
+
+    public void setPlayerName(String name) {
+        this.playerName = name;
+    }
+
+    public void updateScores() {
+        this.scores = this.settlements.size();
+    }
+
 }

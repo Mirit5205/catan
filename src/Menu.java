@@ -41,10 +41,12 @@ public class Menu extends State {
 
         if (this.startButton.IsPressed(bufferList)) {
             if (numOfPlayers != 0) {
-                isStageEnd = true;
+               /* isStageEnd = true;
                 if (isStageEnd) {
                     this.game.clearGameCanvas();
                 }
+
+                */
                 this.game.getMouseManager().DoubleClickScreenLocations.clear();
                 GameState game = new GameState(this.game);
                 game.setNumOfPlayers(this.numOfPlayers);
@@ -68,10 +70,12 @@ public class Menu extends State {
 
     @Override
     public void render(Graphics g) {
+
         this.startButton.render(g);
         this.singlePlayerButton.render(g);
         this.twoPlayersButton.render(g);
         this.exitButton.render(g);
+
 
     }
 
