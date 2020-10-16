@@ -8,7 +8,7 @@ public class City extends Sprite {
     public City(Point p, Game g) {
         super(p);
         this.s1 = new Settlement(p, g);
-        this.s2 = new Settlement(new Point(p.x + Settlement.width / 2, p.y + Settlement.height / 2), g);
+        this.s2 = new Settlement(new Point(p.x + Settlement.width / 3, p.y - Settlement.height / 2), g);
     }
 
     @Override
@@ -26,5 +26,10 @@ public class City extends Sprite {
     @Override
     public Point getEndPoint() {
         return null;
+    }
+
+    public void setColor(Color c) {
+        this.s1.setColor(c);
+        this.s2.setColor(c);
     }
 }

@@ -5,11 +5,21 @@ public class Button extends Sprite {
 
     private Rectangle buttonRectangle;
     private String buttonText;
+    private int w;
+    private int h;
+    private Color color;
+
 
     private static final int width = 200 ;
     private static final int height = 100;
 
     public Button(Point p, String s) {
+        super(p);
+        buttonRectangle = new Rectangle(p.x, p.y, width, height);
+        buttonText = s;
+    }
+
+    public Button(Point p, String s, String test) {
         super(p);
         buttonRectangle = new Rectangle(p.x, p.y, width, height);
         buttonText = s;
@@ -43,5 +53,17 @@ public class Button extends Sprite {
             }
         }
         return b;
+    }
+
+    public void setWidth(int width) {
+        this.w = width;
+    }
+
+    public void setHeight(int height) {
+        this.h = height;
+    }
+
+    public void setColor(Color c) {
+        this.color = c;
     }
 }

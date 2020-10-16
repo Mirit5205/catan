@@ -46,6 +46,7 @@ public class Game implements Runnable {
         test.setNumOfPlayers(2);
         test.initPlayersArr();
         test.initListOfFirstTurnsByOrder();
+        test.initGameCardsList();
         this.gameState = test;
 
 

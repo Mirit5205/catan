@@ -15,8 +15,10 @@ public class GameState extends State {
     private List<Player> playersFirstTurnsByOrder = new ArrayList<>();
     private List<Point> clearVertexes;
     private List<Line> clearEdges;
+
     private DiceButton diceButton;
     private Button endTurnButton;
+    private Button cardButton;
 
     private static String WOOD = "w";
     private static String SHEEP = "s";
@@ -46,8 +48,10 @@ public class GameState extends State {
         clearEdges = this.game.getBoard().BoardEdgesList;
         diceButton = new DiceButton(new Point(DICE_BUTTON_X, DICE_BUTTON_y));
         endTurnButton = new Button(new Point(DICE_BUTTON_X, DICE_BUTTON_y + 200), "End Turn");
+        cardButton = new Button(new Point(DICE_BUTTON_X, DICE_BUTTON_y + 400), "Take Card");
         spriteList.add(diceButton);
         spriteList.add(endTurnButton);
+        spriteList.add(cardButton);
     }
 
     @Override
@@ -277,12 +281,28 @@ public class GameState extends State {
 
         for (Resource r : this.board.boardTiles) {
             edges = hexagonRepresentByEdges(r.getHexagon());
+
+            //take 1 resources according to every settlement
             for (Settlement s : p.getSettlementsList()) {
                 for (int  i = 0; i < edges.length; i++) {
                     if (edges[i].ptSegDist(s.startPoint) < 0.1) {
-                        if (r.getStat() == diceVal )
+                        if (r.getStat() == diceVal ) {
                             p.getResourcesList().add(r.getResourceType());
-                        break;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            //take 2 according resources for every city
+            for (City c : p.getCitiesList()) {
+                for (int  i = 0; i < edges.length; i++) {
+                    if (edges[i].ptSegDist(c.startPoint) < 0.1) {
+                        if (r.getStat() == diceVal ) {
+                            p.getResourcesList().add(r.getResourceType());
+                            p.getResourcesList().add(r.getResourceType());
+                            break;
+                        }
                     }
                 }
 

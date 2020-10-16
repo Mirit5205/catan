@@ -10,6 +10,7 @@ public class Player {
     private List<Settlement> settlements = new ArrayList<>();
     private List<Road> roads = new ArrayList<>();
     private List<City> cities = new ArrayList<>();
+    private List<String> developmentCardsList = new ArrayList<>();
     private int scores;
 
     public Player(Color c) {
@@ -23,6 +24,15 @@ public class Player {
     public List<String> getResourcesList() {
         return this.resources;
     }
+
+    public List<City> getCitiesList() {
+        return this.cities;
+    }
+
+    public List<String> getDevelopmentCardsList() {
+        return this.developmentCardsList;
+    }
+
 
     public Color getColor() {
         return this.c;
@@ -49,7 +59,29 @@ public class Player {
     }
 
     public void updateScores() {
-        this.scores = this.settlements.size();
+        this.scores = this.settlements.size()
+                + this.getCitiesList().size() * 2;
+
+    }
+
+    public Settlement getSettlementByPoint(Point settlementPoint) {
+        Settlement settlement = null;
+        for (Settlement s : settlements) {
+            if (s.getStartPoint().equals(settlementPoint)) {
+                settlement = s;
+            }
+        }
+        return settlement;
+    }
+
+    public Settlement getClosestSettlementByPoint(Point settlementPoint) {
+        Settlement settlement = null;
+        for (Settlement s : settlements) {
+            if (s.getStartPoint().distance(settlementPoint.x, settlementPoint.y) < 15) {
+                settlement = s;
+            }
+        }
+        return settlement;
     }
 
 }

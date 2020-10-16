@@ -31,4 +31,8 @@ public class Road extends Sprite {
     public void setColor(Color c) {
         this.c = c;
     }
+
+    public Line getRoadLine() {
+        return this.l;
+    }
 }

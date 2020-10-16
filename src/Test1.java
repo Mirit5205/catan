@@ -1,6 +1,10 @@
+import biuoop.KeyboardSensor;
+
 import java.awt.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Test1 extends State {
@@ -11,13 +15,20 @@ public class Test1 extends State {
     private int numOfPlayers;
     private Player[] players;
     private Board board;
+
     private List<Sprite> spriteList = new ArrayList<>();
     private List<Point> bufferList = new ArrayList<>();
     private List<Player> playersFirstTurnsByOrder = new ArrayList<>();
+    private List<String> gameCards = new ArrayList<>();
     private List<Point> clearVertexes;
     private List<Line> clearEdges;
+
     private DiceButton diceButton;
     private Button endTurnButton;
+    private Button cardButton;
+    private Button instructionButton;
+    private Button showResourceButton;
+    private Button showDevCardsButton;
 
     private static String WOOD = "w";
     private static String SHEEP = "s";
@@ -30,11 +41,21 @@ public class Test1 extends State {
     private static final String SETTLEMENT = "settlement";
     private static final String CARD = "card";
 
+    private static final String KNIGHT = "knight";
+    private static final String MONOPOLY = "monopoly";
+    private static final String PLENTY = "year of plenty";
+    private static final String SCORE = "victory point";
+    private static final String ROADS_BUILDER = "roads builder";
+
+
     private int turnCounter = 0;
 
 
     private static int DICE_BUTTON_X = 100;
     private static int DICE_BUTTON_y = 300;
+
+    private static int INSTRUCTION_BUTTON_X = 1500;
+    private static int INSTRUCTION_BUTTON_Y = 50;
 
 
     public Test1(Game g) {
@@ -43,8 +64,21 @@ public class Test1 extends State {
         clearEdges = this.game.getBoard().BoardEdgesList;
         diceButton = new DiceButton(new Point(DICE_BUTTON_X, DICE_BUTTON_y));
         endTurnButton = new Button(new Point(DICE_BUTTON_X, DICE_BUTTON_y + 200), "End Turn");
+        cardButton = new Button(new Point(DICE_BUTTON_X, DICE_BUTTON_y + 400), "Take Card");
+
+        instructionButton = new Button(new Point(INSTRUCTION_BUTTON_X, INSTRUCTION_BUTTON_Y), "i");
+        showResourceButton = new Button(new Point(INSTRUCTION_BUTTON_X - 60, INSTRUCTION_BUTTON_Y), "");
+        showDevCardsButton = new Button(new Point(INSTRUCTION_BUTTON_X - 60, INSTRUCTION_BUTTON_Y), "");
+
+        //add buttons
         spriteList.add(diceButton);
         spriteList.add(endTurnButton);
+        spriteList.add(cardButton);
+
+        spriteList.add(instructionButton);
+        spriteList.add(showResourceButton);
+        spriteList.add(showDevCardsButton);
+
     }
 
     @Override
@@ -182,14 +216,16 @@ public class Test1 extends State {
         for (Settlement s : p.getSettlementsList()) {
             if (isRoadIsNextToSettelment(s, roadEdge)) {
                 b = true;
-                break;
+                return b;
+                //break;
             }
         }
 
         for (Road r : p.getRoadsList()) {
             if (isRoadIsNextToRoad(r, roadEdge)) {
                 b = true;
-                break;
+                return b;
+                //break;
             }
         }
         return b;
@@ -206,6 +242,12 @@ public class Test1 extends State {
         return s instanceof Settlement
                 && (int) roadEdge.ptSegDist(s.startPoint) == 0;
     }
+
+    public boolean isRoadIsNextToSettelment(Point settlementPoint, Line roadEdge) {
+        return (int) roadEdge.ptSegDist(settlementPoint) == 0;
+    }
+
+
 
     /**
      * check if the given road is next to existent road.
@@ -271,8 +313,7 @@ public class Test1 extends State {
     /**
      * check which player's settlements intersect with resources that has
      * stat that equal to dice value and add them to player resources list.
-     *
-     * @param p       is the player.
+     * @param p is the player.
      * @param diceVal is the dice value.
      */
     public void takeResourcesAccordingToDice(int diceVal, Player p) {
@@ -280,18 +321,35 @@ public class Test1 extends State {
 
         for (Resource r : this.board.boardTiles) {
             edges = hexagonRepresentByEdges(r.getHexagon());
+
+            //take 1 resources according to every settlement
             for (Settlement s : p.getSettlementsList()) {
-                for (int i = 0; i < edges.length; i++) {
+                for (int  i = 0; i < edges.length; i++) {
                     if (edges[i].ptSegDist(s.startPoint) < 0.1) {
-                        if (r.getStat() == diceVal)
+                        if (r.getStat() == diceVal ) {
                             p.getResourcesList().add(r.getResourceType());
-                        break;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            //take 2 according resources for every city
+            for (City c : p.getCitiesList()) {
+                for (int  i = 0; i < edges.length; i++) {
+                    if (edges[i].ptSegDist(c.startPoint) < 0.1) {
+                        if (r.getStat() == diceVal ) {
+                            p.getResourcesList().add(r.getResourceType());
+                            p.getResourcesList().add(r.getResourceType());
+                            break;
+                        }
                     }
                 }
 
             }
         }
     }
+
 
     /**
      * divide hexagon into edges and store them in array.
@@ -347,8 +405,10 @@ public class Test1 extends State {
                 settlementPurchase(p.getResourcesList());
             }
         } else if (s.equals(CITY)) {
+            System.out.println("check resources for city");
             b = isEnoughResourcesForCity(p.getResourcesList());
             if (b) {
+                System.out.println("enough resources for city");
                 cityPurchase(p.getResourcesList());
             }
         } else {
@@ -414,6 +474,8 @@ public class Test1 extends State {
      * @return true if it does.
      */
     public boolean isEnoughResourcesForCity(List<String> playerResources) {
+        System.out.println("irons " + getPlayerNumberOfSpecificResource(playerResources, IRON) );
+        System.out.println("hay " + getPlayerNumberOfSpecificResource(playerResources, HAY) );
         return getPlayerNumberOfSpecificResource(playerResources, IRON) >= 3
                 && getPlayerNumberOfSpecificResource(playerResources, HAY) >= 2;
     }
@@ -584,7 +646,7 @@ public class Test1 extends State {
     public void initPlayersArr() {
         Color[] playersColors = {Color.RED, Color.MAGENTA, Color.LIGHT_GRAY, Color.DARK_GRAY};
         players = new Player[this.numOfPlayers];
-        String[] resourceArr = {"w", "w", "w", "w", "w", "w", "w", "w",
+        /*String[] resourceArr = {"w", "w", "w", "w", "w", "w", "w", "w",
                 "m", "m", "m", "m", "m", "m", "m", "m",
                 "s", "s", "s", "s", "s", "s", "s", "s",
                 "h", "h", "h", "h", "h", "h", "h", "h",
@@ -619,7 +681,16 @@ public class Test1 extends State {
                 "w", "w", "w", "w", "w", "w", "w", "w",
                 "m", "m", "m", "m", "m", "m", "m", "m",
                 "s", "s", "s", "s", "s", "s", "s", "s",
-                "h", "h", "h", "h", "h", "h", "h", "h"};
+                "h", "h", "h", "h", "h", "h", "h", "h",
+                "i", "i", "i", "i", "i", "i", "i", "i",
+                "i","i", "i","i","i", "i", "i","i","i",
+                "i","i", "i","i","i", "i", "i","i","i",
+                "i","i", "i","i","i", "i", "i","i","i",
+                "i","i", "i","i","i", "i", "i","i","i",
+                "i","i", "i","i","i", "i", "i","i","i" };
+
+         */
+        String[] resourceArr = {"w", "w", "i","i", "i", "s", "h", "h", "h", "m", "m"};
         List<String> resourcelist = Arrays.asList(resourceArr);
         String[] playersNames = {"Red", "Pink", "Light Gray", "Dark Gray"};
 
@@ -630,7 +701,17 @@ public class Test1 extends State {
         }
     }
 
+    public void initGameCardsList() {
+        String[] devCards = {KNIGHT, KNIGHT, KNIGHT, KNIGHT, KNIGHT,
+                KNIGHT, KNIGHT, KNIGHT, KNIGHT, KNIGHT,
+                KNIGHT, KNIGHT, KNIGHT, KNIGHT, KNIGHT,
+                KNIGHT, KNIGHT, KNIGHT, KNIGHT, KNIGHT,
+                MONOPOLY, MONOPOLY, PLENTY, PLENTY, SCORE, SCORE,
+                SCORE, SCORE };
+        this.gameCards = Arrays.asList(devCards);
+        Collections.shuffle(this.gameCards);
 
+    }
     /**
      * play turn in the game.
      *
@@ -650,20 +731,34 @@ public class Test1 extends State {
          */
         System.out.println(player.getPlayerName() + " turn");
         Point p = bufferList.get(0);
+
+        //try to purchase development card
+        if (cardButton.IsPressed(bufferList) && !this.gameCards.isEmpty()) {
+            if (doesHaveEnoughResources(CARD, player)) {
+                cardPurchase(player.getResourcesList());
+                player.getDevelopmentCardsList().add(this.gameCards.get(0));
+            }
+        }
+
         Point closestSettelmentPoint = findClosestVertex(p);
         Line closestRoadEdge = findClosestEdge(p);
+        Settlement existedSettlement = player.getClosestSettlementByPoint(bufferList.get(0));
 
         if (closestRoadEdge == null && closestSettelmentPoint == null) {
             //remove point from the list of mouse click points
             this.game.getMouseManager().DoubleClickScreenLocations.remove(p);
+        } else if (existedSettlement != null) {
+            if (isThereAlreadySettlement(existedSettlement.getStartPoint(), player)) {
+                if (doesHaveEnoughResources(CITY, player)) {
+                    buildCity(existedSettlement, player);
+                }
+            }
         } else if (closestSettelmentPoint != null) {
             if (doesHaveEnoughResources(SETTLEMENT, player)) {
-                System.out.println("enough resources for settlement");
                 buildSettlement(closestSettelmentPoint, player);
             }
         } else {
             if (doesHaveEnoughResources(ROAD, player)) {
-                System.out.println("enough resources for road");
                 buildRoad(closestRoadEdge, player);
             }
         }
@@ -683,11 +778,13 @@ public class Test1 extends State {
      */
     public void chooseFirstLocations(Player player) {
         Point p = bufferList.get(0);
+
         Point closestSettelmentPoint = findClosestVertex(p);
         Line closestRoadEdge = findClosestEdge(p);
 
         int playerSettlementsCounter = player.getSettlementsList().size();
         int playerRoadsCounter = player.getRoadsList().size();
+
 
         if (closestRoadEdge == null && closestSettelmentPoint == null) {
             //remove point from the list of mouse click points
@@ -697,17 +794,33 @@ public class Test1 extends State {
                     || (playerSettlementsCounter == 1
                     && playerRoadsCounter == 1)) {
                 buildSettlement(closestSettelmentPoint, player);
-                playersFirstTurnsByOrder.remove(playersFirstTurnsByOrder.get(0));
+
+                //if the settlement built successfully
+                if (playerSettlementsCounter < player.getSettlementsList().size()) {
+                    System.out.println("Settlement built! "
+                            + player.getSettlementsList().size() );
+                    playersFirstTurnsByOrder.remove(playersFirstTurnsByOrder.get(0));
+                    turnCounter++;
+                }
             }
         } else {
             if (playerRoadsCounter == 0
                     || (playerRoadsCounter == 1
-                    && playerSettlementsCounter == 2)) {
+                    && playerSettlementsCounter == 2
+                    && !isRoadIsNextToSettelment(player.getSettlementsList().get(0), closestRoadEdge)
+                    && !isRoadIsNextToRoad(player.getRoadsList().get(0), closestRoadEdge))) {
                 buildRoad(closestRoadEdge, player);
-                playersFirstTurnsByOrder.remove(playersFirstTurnsByOrder.get(0));
+
+
+                //if the road built successfully
+                if (playerRoadsCounter < player.getRoadsList().size()) {
+                    System.out.println("Road built! "
+                            + player.getRoadsList().size());
+                    playersFirstTurnsByOrder.remove(playersFirstTurnsByOrder.get(0));
+                    turnCounter++;
+                }
             }
         }
-        turnCounter++;
     }
 
     /**
@@ -742,23 +855,47 @@ public class Test1 extends State {
      * @param p               is the player who own the new settlement.
      */
     public void buildSettlement(Point settlementPoint, Player p) {
-        if (this.clearVertexes.contains(settlementPoint)) {
-            //add point to game sprite list as setelment.
+        if (doesSettlementCanBeBuild(settlementPoint, p)) {
+            //create new settlement according to point
             Settlement newSettlement = new Settlement(settlementPoint, this.game);
+
+            //set settlement color according to player color
             newSettlement.setColor(p.getColor());
+
+            //add settlement to sprite list and to player settlement list
             this.spriteList.add(newSettlement);
             p.getSettlementsList().add(newSettlement);
+
             System.out.println(p.getSettlementsList());
+
+            //remove unreachable settlements locations according to game rules
             removeUnReachableSettelmentesLocations(this.clearVertexes, settlementPoint);
         }
     }
 
+    public void buildCity(Settlement s, Player p) {
+        Point cityPoint = s.getStartPoint();
+        System.out.println(cityPoint);
+        City newCity = new City(cityPoint, this.game);
+
+        //set settlement color according to player color
+        newCity.setColor(p.getColor());
+
+        //add settlement to sprite list and to player settlement list
+        this.spriteList.add(newCity);
+        p.getCitiesList().add(newCity);
+        this.spriteList.remove(s);
+        p.getSettlementsList().remove(s);
+
+
+    }
 
     /**
      * initial player's turns order.
      */
     public void initListOfFirstTurnsByOrder() {
 
+        //initial players turns: first - > last, last - > first
         for (int i = 0; i < players.length; i++) {
             this.playersFirstTurnsByOrder.add(players[i]);
             this.playersFirstTurnsByOrder.add(players[i]);
@@ -834,4 +971,61 @@ public class Test1 extends State {
         }
         return b;
     }
+
+    public boolean isNewSettlementCloseToPlayerRoad(Point settlementPoint, Player p) {
+        boolean b = false;
+        for (Road r : p.getRoadsList()) {
+            if (isRoadIsNextToSettelment(settlementPoint, r.getRoadLine())) {
+                b = true;
+            }
+        }
+        return b;
+    }
+
+    public boolean doesSettlementCanBeBuild(Point settlementPoint, Player p) {
+        return this.clearVertexes.contains(settlementPoint)
+                && (!doesAllPlayersPickThereLocations || isNewSettlementCloseToPlayerRoad(settlementPoint, p));
+    }
+
+    public boolean isThereAlreadySettlement(Point desireSettlement, Player p) {
+        boolean b = false;
+        for (Settlement s : p.getSettlementsList()) {
+            if (s.getStartPoint().equals(desireSettlement)) {
+                b = true;
+                break;
+            }
+        }
+        return b;
+    }
+
+
+/*
+    public int getSizeOfLongerRoad(Player p) {
+        int i = 0;
+        List<Road> interSectionRoads = new ArrayList<>();
+        interSectionRoads.add(p.getRoadsList().get(i));
+
+        for (Road r1 : interSectionRoads ) {
+            for (Road r2 : p.getRoadsList()) {
+                if (r1.getRoadLine().intersectsLine(r2.getRoadLine())
+                        && !isRoadIntersectWithListOfRoads(r2 ,interSectionRoads)) {
+                    interSectionRoads.add(r2);
+                }
+            }
+        }
+    }
+
+    public boolean isRoadIntersectWithListOfRoads(Road road, List<Road> roadsList) {
+        boolean b = false;
+        for (Road r : roadsList) {
+            if (road.getRoadLine().intersectsLine(r.getRoadLine())) {
+                b = true;
+            }
+        }
+        return b;
+    }
+ */
+
+
 }
+

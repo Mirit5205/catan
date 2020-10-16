@@ -77,8 +77,10 @@ public class Line extends Line2D {
         Line other = (Line) o;
 
         // Compare the data members and return accordingly
-        return this.getP1().distance(other.getP1()) == 0
-                && this.getP2().distance(other.getP2()) == 0;
+        return (this.getP1().distance(other.getP1()) <= 0.000005
+                && this.getP2().distance(other.getP2()) <= 0.000005)
+                || (this.getP1().distance(other.getP2()) <= 0.000005
+                && this.getP2().distance(other.getP1()) <= 0.000005);
     }
 }
 
