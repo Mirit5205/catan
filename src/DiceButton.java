@@ -1,20 +1,20 @@
 import java.awt.*;
 import java.util.Random;
 
-public class DiceButton extends Sprite {
+public class DiceButton extends GameRunTimeButton {
 
-    private Rectangle button;
+    //private String buttonText;
     private Random rand;
     private int diceVal;
 
-    private static final int width = 200 ;
-    private static final int height = 100;
+    //private static final int width = 200 ;
+    //private static final int height = 100;
 
-    public DiceButton(Point p) {
-        super(p);
-        button = new Rectangle(p.x, p.y, width, height);
+    public DiceButton(Point p, int width, int height) {
+        super(p, width, height);
         this.rand = new Random();
     }
+
 
     @Override
     public void tick() {
@@ -23,11 +23,9 @@ public class DiceButton extends Sprite {
 
     @Override
     public void render(Graphics g) {
-        g.setColor(Color.BLUE);
-        g.fillRect(this.startPoint.x, this.startPoint.y, width, height);
-        g.setColor(Color.white);
+        super.render(g);
         g.drawString("Roll The Dice", this.startPoint.x + 10,
-                this.startPoint.y + height / 2);
+                this.startPoint.y + (int) this.buttonRectangle.getHeight() / 2);
     }
 
     @Override
@@ -36,7 +34,7 @@ public class DiceButton extends Sprite {
     }
 
     public Rectangle getButtonRectengle() {
-        return this.button;
+        return this.buttonRectangle;
     }
 
     public void rollTheDice() {

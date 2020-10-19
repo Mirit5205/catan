@@ -12,6 +12,7 @@ public class Player {
     private List<City> cities = new ArrayList<>();
     private List<String> developmentCardsList = new ArrayList<>();
     private int scores;
+    private int usedKnights;
 
     public Player(Color c) {
         this.c = c;
@@ -84,4 +85,17 @@ public class Player {
         return settlement;
     }
 
+    public int getNumOfSpecificCard(String s) {
+        int i = 0;
+        for (String cardType : this.getDevelopmentCardsList()) {
+            if (cardType.equals(s)) {
+                i++;
+            }
+        }
+        return i;
+    }
+
+    public int getNumOfUsedKnights() {
+        return this.usedKnights;
+    }
 }

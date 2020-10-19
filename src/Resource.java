@@ -68,15 +68,15 @@ public class Resource {
      */
     public void setColorAccordingToString(String s) {
         if (s.equals("w")) {
-            this.color = new Color(0, 153, 0);;
+            this.color = new Color(0, 153, 0);
         } else if (s.equals("s")) {
-            this.color = new Color(51, 255, 51);;
+            this.color = new Color(51, 255, 51);
         } else if (s.equals("m")) {
             this.color = new Color(153, 76, 0);
         } else if (s.equals("i")) {
             this.color = new Color(160, 160, 160);
         } else if (s.equals("h")) {
-            this.color = new Color(255, 255, 0);;
+            this.color = new Color(255, 255, 0);
         } else {
             this.color = Color.black;
         }

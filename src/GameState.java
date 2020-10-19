@@ -46,9 +46,12 @@ public class GameState extends State {
         super(g);
         clearVertexes = this.game.getBoard().BoardVertexList;
         clearEdges = this.game.getBoard().BoardEdgesList;
-        diceButton = new DiceButton(new Point(DICE_BUTTON_X, DICE_BUTTON_y));
+        //diceButton = new DiceButton(new Point(DICE_BUTTON_X, DICE_BUTTON_y));
+        /*
         endTurnButton = new Button(new Point(DICE_BUTTON_X, DICE_BUTTON_y + 200), "End Turn");
         cardButton = new Button(new Point(DICE_BUTTON_X, DICE_BUTTON_y + 400), "Take Card");
+
+         */
         spriteList.add(diceButton);
         spriteList.add(endTurnButton);
         spriteList.add(cardButton);
@@ -774,7 +777,7 @@ public class GameState extends State {
      */
     public void secondStageOfGame() {
         if (doesAllPlayersPickThereLocations) {
-            if (endTurnButton.IsPressed(bufferList) && this.doesDiceRolled) {
+            if (endTurnButton.isPressed(bufferList) && this.doesDiceRolled) {
                 turnCounter++;
                 this.doesDiceRolled = false;
             }

@@ -23,11 +23,12 @@ public class Menu extends State {
 
     public Menu(Game g) {
         super(g);
+        /*
         startButton = new Button(new Point(START_BUTTON_X, START_BUTTON_Y), "Start");
         singlePlayerButton = new Button(new Point(START_BUTTON_X, START_BUTTON_Y + 2 * height), "1 Player");
         twoPlayersButton = new Button(new Point(START_BUTTON_X, START_BUTTON_Y + 4 * height), "2 Player");
         exitButton = new Button(new Point(START_BUTTON_X, START_BUTTON_Y + 6 * height  ), "Exit");
-
+         */
 
     }
 
@@ -35,11 +36,11 @@ public class Menu extends State {
     public void tick() {
         bufferList.addAll(this.game.getMouseManager().DoubleClickScreenLocations);
 
-        if (this.exitButton.IsPressed(bufferList)) {
+        if (this.exitButton.isPressed(bufferList)) {
             System.exit(0);
         }
 
-        if (this.startButton.IsPressed(bufferList)) {
+        if (this.startButton.isPressed(bufferList)) {
             if (numOfPlayers != 0) {
                /* isStageEnd = true;
                 if (isStageEnd) {
@@ -57,11 +58,11 @@ public class Menu extends State {
             }
         }
 
-        if (this.singlePlayerButton.IsPressed(bufferList)) {
+        if (this.singlePlayerButton.isPressed(bufferList)) {
             this.numOfPlayers = 1;
         }
 
-        if (this.twoPlayersButton.IsPressed(bufferList)) {
+        if (this.twoPlayersButton.isPressed(bufferList)) {
             this.numOfPlayers = 2;
         }
 

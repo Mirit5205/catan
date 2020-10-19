@@ -12,23 +12,23 @@ public class MonopolyCard extends DevelopmentCard {
 
     @Override
     public void useAbility() {
-        List<Resource> buffer;
+        List<String> buffer;
         for (int i = 0; i < this.gamePlayers.length; i++) {
 
             //if its the owner of the card, continue in the loop
             if (gamePlayers[i].getPlayerName().equals(this.owner.getPlayerName())) {
                 continue;
             }
-            //buffer = gamePlayers[i].getResourcesList();
+            buffer = gamePlayers[i].getResourcesList();
 
             //if the monopoly resource appear remove it from the
             //this resource list and add it to the owner list
-            //for (Resource r : buffer ) {
-             //  if (r.getResourceType().equals(this.monopolyResource)) {
-              //     this.owner.getResourcesList().add(r);
-              //     gamePlayers[ i].getResourcesList().remove(r);
-              // }
-            //}
+            for (String s : buffer ) {
+               if (s.equals(this.monopolyResource)) {
+                   this.owner.getResourcesList().add(s);
+                   gamePlayers[ i].getResourcesList().remove(s);
+               }
+            }
         }
     }
 

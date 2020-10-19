@@ -1,16 +1,54 @@
 import java.awt.*;
 import java.util.List;
 
-public class Button extends Sprite {
+public abstract class Button extends Sprite {
 
-    private Rectangle buttonRectangle;
-    private String buttonText;
-    private int w;
-    private int h;
-    private Color color;
+    protected Rectangle buttonRectangle;
+    //private Color color;
 
+    public Button(Point p, int width, int height) {
+        super(p);
+        buttonRectangle = new Rectangle(p.x, p.y, width, height);
+    }
 
-    private static final int width = 200 ;
+    @Override
+    public void tick() {
+
+    }
+
+    @Override
+    public abstract void render(Graphics g);
+
+    @Override
+    public Point getEndPoint() {
+        return null;
+    }
+
+    public boolean isPressed(List<Point> clicks) {
+        boolean b = false;
+        for (Point p : clicks) {
+            if (this.buttonRectangle.contains(p)) {
+                b = true;
+            }
+        }
+        return b;
+    }
+
+    /*
+    public void setWidth(int width) {
+        this.w = width;
+    }
+
+    public void setHeight(int height) {
+        this.h = height;
+    }
+
+    public void setColor(Color c) {
+        this.color = c;
+    }
+     */
+
+   /* private static final int width = 200 ;
     private static final int height = 100;
 
     public Button(Point p, String s) {
@@ -66,4 +104,6 @@ public class Button extends Sprite {
     public void setColor(Color c) {
         this.color = c;
     }
+
+    */
 }
